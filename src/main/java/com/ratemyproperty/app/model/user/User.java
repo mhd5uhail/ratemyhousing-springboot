@@ -1,29 +1,30 @@
 package com.ratemyproperty.app.model.user;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
 
-    public User() {
-
+    public User(String email, String name) {
+        this.email = email;
+        this.name = name;
     }
 
-    public User(String email, String password, String name) {
-        this.email = email;
-        this.password = password;
-        this.name = name;
+    public User() {
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String email;
+    @Column(nullable = false, unique = true)
+    private String email; //username
 
     @Column(nullable = false)
     private String name;
@@ -34,11 +35,13 @@ public class User {
 
     private List<String> tokens;
 
-    private List<String> properties;
+    @OneToMany(mappedBy = "owner")
+    private Set<Property> properties = new HashSet<>();
 
     private List<String> reviews;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
 
     public String getEmail() {
         return email;
@@ -56,8 +59,38 @@ public class User {
         this.name = name;
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singleton(new SimpleGrantedAuthority(this.role.name()));
+    }
+
     public String getPassword() {
-        return password;
+        return this.password;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     public void setPassword(String password) {
@@ -80,11 +113,11 @@ public class User {
         this.tokens = tokens;
     }
 
-    public List<String> getProperties() {
+    public Set<Property> getProperties() {
         return properties;
     }
 
-    public void setProperties(List<String> properties) {
+    public void setProperties(Set<Property> properties) {
         this.properties = properties;
     }
 
@@ -96,11 +129,11 @@ public class User {
         this.reviews = reviews;
     }
 
-    public String getRole() {
+    public UserRole getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(UserRole role) {
         this.role = role;
     }
 

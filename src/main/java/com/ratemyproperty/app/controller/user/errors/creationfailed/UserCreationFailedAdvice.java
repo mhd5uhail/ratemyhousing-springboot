@@ -1,0 +1,15 @@
+package com.ratemyproperty.app.controller.user.errors.creationfailed;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+public class UserCreationFailedAdvice {
+    @ExceptionHandler(UserCreationFailed.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    String userCreationFailedAdvice(UserCreationFailed ex) {
+        return ex.getMessage();
+    }
+}
